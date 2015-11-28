@@ -21,15 +21,17 @@
 
 
 
+(def ^:dynamic *id* (atom 0))
+
+(defn next-id [] (swap! *id* inc))
+
+
+
 (defn-todo building-space-available? [location] true)
 
 (defn building-possible? [world location building-tpl]
   ;; (enough-resources? requirements)
   (building-space-available? location))
-
-(def ^:dynamic *id* (atom 0))
-
-(defn next-id [] (swap! *id* inc))
 
 (defn conj-new [objects tpl]
   (conj objects (assoc tpl :id (next-id))))
