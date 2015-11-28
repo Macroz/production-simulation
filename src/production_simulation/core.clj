@@ -32,7 +32,6 @@
 (defn next-id [] (swap! *id* inc))
 
 (defn conj-new [objects tpl]
-  (println objects tpl)
   (conj objects (assoc tpl :id (next-id))))
 
 (defn build [world location building-tpl]
