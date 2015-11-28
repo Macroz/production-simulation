@@ -12,7 +12,7 @@
 (defn building-path [id] [buildings-path id])
 
 (def locations-path [:locations])
-(defn location-path [id] [:locations id])
+(defn location-path [id] [locations-path id])
 
 
 
