@@ -7,7 +7,7 @@
      ~@body))
 
 
-o
+
 (def buildings-path [:buildings])
 (defn building-path [id] [buildings-path id])
 
