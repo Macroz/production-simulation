@@ -6,6 +6,11 @@
      (println "TODO:" ~(name s) "=>" ~@body)
      ~@body))
 
+(defmacro check [fn & args]
+  `(let [result# (~fn ~@args)]
+     (println "CHECK:" ~(name fn) result#)
+     result#))
+
 
 
 (def buildings-path [:buildings])
@@ -22,10 +27,6 @@
   ;; (enough-resources? requirements)
   (building-space-available? location))
 
-(defmacro check [fn & args]
-  `(let [result# (~fn ~@args)]
-     (println "CHECK:" ~(name fn) result#)
-     result#))
 
 (def ^:dynamic *id* (atom 1))
 
