@@ -27,8 +27,7 @@
   ;; (enough-resources? requirements)
   (building-space-available? location))
 
-
-(def ^:dynamic *id* (atom 1))
+(def ^:dynamic *id* (atom 0))
 
 (defn next-id [] (swap! *id* inc))
 
