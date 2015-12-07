@@ -23,7 +23,9 @@
 
 (def ^:dynamic *id* (atom 0))
 
-(defn next-id [] (swap! *id* inc))
+(defn next-id []
+  (let [x (swap! *id* inc)]
+    (keyword (str "id_" x))))
 
 
 
@@ -33,17 +35,28 @@
   ;; (enough-resources? requirements)
   (building-space-available? location))
 
-(defn conj-new [objects tpl]
-  (conj objects (assoc tpl :id (next-id))))
+(defn instantiate [tpl]
+  (assoc tpl :id (next-id)))
+
+(defn loc [x]
+  (keyword (str "xy_" x)))
+
+(defn vconj [coll x]
+  (if coll
+    (conj coll x)
+    (vector x)))
 
 (defn build [world location building-tpl]
   (check building-possible? world location building-tpl)
-  (transform buildings-path
-             #(conj-new % building-tpl)
-             world))
+  (let [building (instantiate building-tpl)
+        id (:id building)]
+  (->> world
+       (transform [buildings-path id] (fn [_] building))
+       (transform [locations-path location] #(vconj % id)))))
              
 
 
-(def *world* (atom {:buildings []}))
+(def ^:dynamic *world* (atom {:buildings {} :locations {}}))
 
-(swap! *world* build 123 {:type :farm})
+(swap! *world* build (loc 124) {:type :farm})
+(swap! *world* build (loc 124) {:type :city})
