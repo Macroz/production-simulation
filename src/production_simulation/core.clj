@@ -1,6 +1,13 @@
 (ns production-simulation.core
   (:require [com.rpl.specter :refer :all]))
 
+(defn vconj [coll x]
+  (if coll
+    (conj coll x)
+    (vector x)))
+
+
+
 (defmacro defn-todo [s args & body]
   `(defn ~s ~args
      (println "TODO:" ~(name s) "=>" ~@body)
@@ -41,10 +48,6 @@
 (defn loc [x]
   (keyword (str "xy_" x)))
 
-(defn vconj [coll x]
-  (if coll
-    (conj coll x)
-    (vector x)))
 
 (defn build [world location building-tpl]
   (check building-possible? world location building-tpl)
