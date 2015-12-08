@@ -48,18 +48,26 @@
 (defn loc [x]
   (keyword (str "xy_" x)))
 
+(defn requirements-for [building-tpl]
+  ({:farm {:work 100 :people 10}
+    :city {:work 1000 :people 1000}} (first (:types building-tpl))))
 
-(defn build [world location building-tpl]
+(defn setup-construction-site [building-tpl]
+  (->> building-tpl
+       (transform [:construction] (fn [_] (requirements-for building-tpl)))
+       (transform [:types] (fn [s] (conj s :construction-site)))))
+
+(defn begin-construction [world location building-tpl]
   (check building-possible? world location building-tpl)
-  (let [building (instantiate building-tpl)
+  (let [building (-> (instantiate building-tpl)
+                     (setup-construction-site))
         id (:id building)]
-  (->> world
-       (transform [buildings-path id] (fn [_] building))
-       (transform [locations-path location] #(vconj % id)))))
-             
-
+    (->> world
+         (transform [buildings-path id] (fn [_] building))
+         (transform [locations-path location] #(vconj % id)))))
 
 (def ^:dynamic *world* (atom {:buildings {} :locations {}}))
 
-(swap! *world* build (loc 124) {:type :farm})
-(swap! *world* build (loc 124) {:type :city})
+(swap! *world* begin-construction (loc 124) {:types #{:farm}})
+(swap! *world* begin-construction (loc 124) {:types #{:city}})
+(swap! *world* begin-construction (loc 126) {:types #{:city}})
