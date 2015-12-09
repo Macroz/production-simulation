@@ -20,8 +20,8 @@
 
 
 
-(def buildings-path [:buildings])
-(defn building-path [id] [buildings-path id])
+(def objects-path [:objects])
+(defn object-path [id] [objects-path id])
 
 (def locations-path [:locations])
 (defn location-path [id] [locations-path id])
@@ -63,10 +63,10 @@
                      (setup-construction-site))
         id (:id building)]
     (->> world
-         (transform [buildings-path id] (fn [_] building))
+         (transform [objects-path id] (fn [_] building))
          (transform [locations-path location] #(vconj % id)))))
 
-(def ^:dynamic *world* (atom {:buildings {} :locations {}}))
+(def ^:dynamic *world* (atom {:objects {} :locations {}}))
 
 (swap! *world* begin-construction (loc 124) {:types #{:farm}})
 (swap! *world* begin-construction (loc 124) {:types #{:city}})
