@@ -66,8 +66,59 @@
          (transform [objects-path id] (fn [_] building))
          (transform [locations-path location] #(vconj % id)))))
 
+(defn construction-site? [object]
+  (some #{:construction-site} (:types object)))
+
+(defn worker? [object]
+  (contains? (:capabilities object) :work))
+
+(defn work-at-site [world [site work]]
+  (transform [objects-path (:id site) :construction :work]
+             #(- % work)
+             world))
+
+(defn work-phase [world]
+  ;;(check working-possible? world location unit)
+  (let [construction-sites (select [objects-path ALL (view val) construction-site?] world)
+        sites-by-id (group-by :id construction-sites)
+        workers (select [objects-path ALL (view val) worker?] world)
+        workers-by-id (group-by :id workers)
+        locations (select [locations-path ALL (view second)] world)
+        site-work (doall (mapcat (fn [location]
+                                   (let [sites (mapcat sites-by-id location)
+                                         workers (mapcat workers-by-id location)]
+                                     (when (and sites workers)
+                                       (let [total-work (reduce + (select [ALL :capabilities :work] workers))
+                                             work-per-site (/ total-work (count sites))]
+                                         (for [site sites]
+                                           [site work-per-site])))))
+                                 locations))]
+    (reduce work-at-site world site-work)))
+
+(defn finish-unit [world location unit-tpl]
+  (let [unit (-> (instantiate unit-tpl)
+                 (update-in [:types] conj :unit))
+        id (:id unit)]
+    (->> world
+         (transform [objects-path id] (fn [_] unit))
+         (transform [locations-path location] #(vconj % id)))))
+
 (def ^:dynamic *world* (atom {:objects {} :locations {}}))
 
 (swap! *world* begin-construction (loc 124) {:types #{:farm}})
 (swap! *world* begin-construction (loc 124) {:types #{:city}})
 (swap! *world* begin-construction (loc 126) {:types #{:city}})
+(swap! *world* finish-unit (loc 124) {:capabilities {:work 10}})
+(swap! *world* work-phase)
+
+(defn ->object [id]
+  (get-in @*world* [:objects id]))
+
+(defn spy [e]
+  (println "spied" (pr-str e))
+  e)
+
+;;(println (select [locations-path :xy_124 ALL ->object spy] @*world*))
+(def t (select [locations-path :xy_124 ALL (view ->object)] @*world*))
+
+(def k (select [locations-path :xy_124 ALL (view ->object) construction-site?] @*world*))
