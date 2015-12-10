@@ -78,7 +78,6 @@
              world))
 
 (defn work-phase [world]
-  ;;(check working-possible? world location unit)
   (let [construction-sites (select [objects-path ALL (view val) construction-site?] world)
         sites-by-id (group-by :id construction-sites)
         workers (select [objects-path ALL (view val) worker?] world)
