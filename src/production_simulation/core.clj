@@ -77,7 +77,7 @@
              #(- % work)
              world))
 
-(defn work-phase [world]
+(defn work-phase [world dt]
   (let [construction-sites (select [objects-path ALL (view val) construction-site?] world)
         sites-by-id (group-by :id construction-sites)
         workers (select [objects-path ALL (view val) worker?] world)
@@ -87,7 +87,7 @@
                                    (let [sites (mapcat sites-by-id location)
                                          workers (mapcat workers-by-id location)]
                                      (when (and sites workers)
-                                       (let [total-work (reduce + (select [ALL :capabilities :work] workers))
+                                       (let [total-work (* dt (reduce + (select [ALL :capabilities :work] workers)))
                                              work-per-site (/ total-work (count sites))]
                                          (for [site sites]
                                            [site work-per-site])))))
@@ -108,7 +108,7 @@
 (swap! *world* begin-construction (loc 124) {:types #{:city}})
 (swap! *world* begin-construction (loc 126) {:types #{:city}})
 (swap! *world* finish-unit (loc 124) {:capabilities {:work 10}})
-(swap! *world* work-phase)
+(swap! *world* work-phase 1.0)
 
 (defn ->object [id]
   (get-in @*world* [:objects id]))
