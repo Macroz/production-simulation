@@ -103,7 +103,8 @@
                                    (let [sites (mapcat sites-by-id location)
                                          workers (mapcat workers-by-id location)]
                                      (when (and sites workers)
-                                       (let [total-work (* dt (reduce + (select [ALL :capabilities :work] workers)))
+                                       (let [work-capabilities (select [ALL :capabilities :work] workers)
+                                             total-work (* dt (reduce + work-capabilities))
                                              work-per-site (/ total-work (count sites))]
                                          (for [site sites]
                                            [site work-per-site])))))
