@@ -92,7 +92,7 @@
 
 (defn do-site-work [world [site work]]
   (transform [objects-path (:id site) :construction :work]
-             #(- % work)
+             #(if % (- % work) nil)
              world))
 
 (defn work-phase [world dt]
