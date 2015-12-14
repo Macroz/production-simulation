@@ -52,13 +52,16 @@
   ;; (enough-resources? requirements)
   (building-space-available? location))
 
-(defn requirements-for [building-tpl]
-  ({:farm {:work 100 :people 10}
-    :city {:work 1000 :people 1000}} (first (:types building-tpl))))
+(def requirements {:farm {:work 100 :people 10}
+                   :city {:work 1000 :people 1000}
+                   :factory {:work 1000 :people 10 :metal 100}})
+
+(defn requirements-for-tpl [building-tpl]
+  (apply merge-with + (map requirements (:types building-tpl))))
 
 (defn setup-construction-site [building-tpl]
   (->> building-tpl
-       (transform [:construction] (fn [_] (requirements-for building-tpl)))
+       (transform [:construction] (fn [_] (requirements-for-tpl building-tpl)))
        (transform [:types] (fn [s] (conj s :construction-site)))))
 
 (defn construction-site? [object]
