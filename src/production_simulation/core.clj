@@ -121,14 +121,3 @@
     (->> world
          (transform [objects-path id] (fn [_] unit))
          (transform [locations-path location] #(vconj % id)))))
-
-
-
-
-(def ^:dynamic *world* (atom {:objects {} :locations {}}))
-
-(swap! *world* begin-construction (loc 124) {:types #{:farm}})
-(swap! *world* begin-construction (loc 124) {:types #{:city}})
-(swap! *world* begin-construction (loc 126) {:types #{:city}})
-(swap! *world* finish-unit (loc 124) {:capabilities {:work 10}})
-(swap! *world* work-phase 1.0)
