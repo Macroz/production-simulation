@@ -99,17 +99,19 @@
   (let [sites-by-id (index-construction-sites world)
         workers-by-id (index-workers world)
         locations (select [locations-path ALL (view second)] world)
-        site-work (doall (mapcat (fn [location]
-                                   (let [sites (mapcat sites-by-id location)
-                                         workers (mapcat workers-by-id location)]
-                                     (when (and sites workers)
-                                       (let [work-capabilities (select [ALL :capabilities :work] workers)
-                                             total-work (* dt (reduce + work-capabilities))
-                                             work-per-site (/ total-work (count sites))]
-                                         (for [site sites]
-                                           [site work-per-site])))))
-                                 locations))]
-    (reduce work-at-site world site-work)))
+        sites-workers (map (fn [location]
+                             (let [sites (mapcat sites-by-id location)
+                                   workers (mapcat workers-by-id location)]
+                               [sites workers])) locations)
+        sites-workers (filter (fn [[sites workers]] (and sites workers)) sites-workers)
+        site-work (mapcat (fn [[sites workers]]
+                                   (let [work-capabilities (select [ALL :capabilities :work] workers)
+                                         total-work (* dt (reduce + work-capabilities))
+                                         work-per-site (/ total-work (count sites))]
+                                     (for [site sites]
+                                       [site work-per-site])))
+                          sites-workers)]
+    (doall (reduce work-at-site world site-work))))
 
 (defn finish-unit [world location unit-tpl]
   (let [unit (-> (instantiate unit-tpl)
