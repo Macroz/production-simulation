@@ -1,6 +1,10 @@
 (ns production-simulation.core
   (:require [com.rpl.specter :refer :all]))
 
+(defn spy [e]
+  (println "spied" (pr-str e))
+  e)
+
 (defn vconj [coll x]
   (if coll
     (conj coll x)
@@ -34,6 +38,12 @@
   (let [x (swap! *id* inc)]
     (keyword (str "id_" x))))
 
+(defn instantiate [tpl]
+  (assoc tpl :id (next-id)))
+
+(defn loc [x]
+  (keyword (str "xy_" x)))
+
 
 
 (defn-todo building-space-available? [location] true)
@@ -41,12 +51,6 @@
 (defn building-possible? [world location building-tpl]
   ;; (enough-resources? requirements)
   (building-space-available? location))
-
-(defn instantiate [tpl]
-  (assoc tpl :id (next-id)))
-
-(defn loc [x]
-  (keyword (str "xy_" x)))
 
 (defn requirements-for [building-tpl]
   ({:farm {:work 100 :people 10}
@@ -57,6 +61,14 @@
        (transform [:construction] (fn [_] (requirements-for building-tpl)))
        (transform [:types] (fn [s] (conj s :construction-site)))))
 
+(defn construction-site? [object]
+  (some #{:construction-site} (:types object)))
+
+(defn worker? [object]
+  (contains? (:capabilities object) :work))
+
+
+
 (defn begin-construction [world location building-tpl]
   (check building-possible? world location building-tpl)
   (let [building (-> (instantiate building-tpl)
@@ -65,12 +77,6 @@
     (->> world
          (transform [objects-path id] (fn [_] building))
          (transform [locations-path location] #(vconj % id)))))
-
-(defn construction-site? [object]
-  (some #{:construction-site} (:types object)))
-
-(defn worker? [object]
-  (contains? (:capabilities object) :work))
 
 (defn work-at-site [world [site work]]
   (transform [objects-path (:id site) :construction :work]
@@ -102,6 +108,9 @@
          (transform [objects-path id] (fn [_] unit))
          (transform [locations-path location] #(vconj % id)))))
 
+
+
+
 (def ^:dynamic *world* (atom {:objects {} :locations {}}))
 
 (swap! *world* begin-construction (loc 124) {:types #{:farm}})
@@ -109,15 +118,3 @@
 (swap! *world* begin-construction (loc 126) {:types #{:city}})
 (swap! *world* finish-unit (loc 124) {:capabilities {:work 10}})
 (swap! *world* work-phase 1.0)
-
-(defn ->object [id]
-  (get-in @*world* [:objects id]))
-
-(defn spy [e]
-  (println "spied" (pr-str e))
-  e)
-
-;;(println (select [locations-path :xy_124 ALL ->object spy] @*world*))
-(def t (select [locations-path :xy_124 ALL (view ->object)] @*world*))
-
-(def k (select [locations-path :xy_124 ALL (view ->object) construction-site?] @*world*))
