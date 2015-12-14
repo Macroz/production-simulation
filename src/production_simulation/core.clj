@@ -56,13 +56,8 @@
                    :city {:work 1000 :people 1000}
                    :factory {:work 1000 :people 10 :metal 100}})
 
-(defn requirements-for-tpl [building-tpl]
-  (apply merge-with + (map requirements (:types building-tpl))))
-
-(defn setup-construction-site [building-tpl]
-  (->> building-tpl
-       (transform [:construction] (fn [_] (requirements-for-tpl building-tpl)))
-       (transform [:types] (fn [s] (conj s :construction-site)))))
+(defn requirements-for-tpl [tpl]
+  (apply merge-with + (map requirements (:types tpl))))
 
 (defn construction-site? [object]
   (some #{:construction-site} (:types object)))
@@ -72,10 +67,14 @@
 
 
 
+(defn setup-construction-site [building-tpl]
+  (->> (instantiate building-tpl)
+       (transform [:construction] (fn [_] (requirements-for-tpl building-tpl)))
+       (transform [:types] (fn [s] (conj s :construction-site)))))
+
 (defn begin-construction [world location building-tpl]
   (check building-possible? world location building-tpl)
-  (let [building (-> (instantiate building-tpl)
-                     (setup-construction-site))
+  (let [building (setup-construction-site building-tpl)
         id (:id building)]
     (->> world
          (transform [objects-path id] (fn [_] building))
