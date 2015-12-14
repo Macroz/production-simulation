@@ -62,8 +62,18 @@
 (defn construction-site? [object]
   (some #{:construction-site} (:types object)))
 
+(defn index-construction-sites [world]
+ (let [sites (select [objects-path ALL (view val) construction-site?] world)
+       sites-by-id (group-by :id sites)]
+   sites-by-id))
+
 (defn worker? [object]
   (contains? (:capabilities object) :work))
+
+(defn index-workers [world]
+  (let [workers (select [objects-path ALL (view val) worker?] world)
+        workers-by-id (group-by :id workers)]
+    workers-by-id))
 
 
 
@@ -86,10 +96,8 @@
              world))
 
 (defn work-phase [world dt]
-  (let [sites (select [objects-path ALL (view val) construction-site?] world)
-        sites-by-id (group-by :id sites)
-        workers (select [objects-path ALL (view val) worker?] world)
-        workers-by-id (group-by :id workers)
+  (let [sites-by-id (index-construction-sites world)
+        workers-by-id (index-workers world)
         locations (select [locations-path ALL (view second)] world)
         site-work (doall (mapcat (fn [location]
                                    (let [sites (mapcat sites-by-id location)
