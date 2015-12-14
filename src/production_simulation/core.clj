@@ -90,7 +90,7 @@
          (transform [objects-path id] (fn [_] building))
          (transform [locations-path location] #(vconj % id)))))
 
-(defn work-at-site [world [site work]]
+(defn do-site-work [world [site work]]
   (transform [objects-path (:id site) :construction :work]
              #(- % work)
              world))
@@ -111,7 +111,7 @@
                                      (for [site sites]
                                        [site work-per-site])))
                           sites-workers)]
-    (doall (reduce work-at-site world site-work))))
+    (doall (reduce do-site-work world site-work))))
 
 (defn finish-unit [world location unit-tpl]
   (let [unit (-> (instantiate unit-tpl)
