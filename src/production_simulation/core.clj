@@ -105,7 +105,6 @@
                                [sites workers])) locations)
         sites-workers (filter (fn [[sites workers]] (and sites workers)) sites-workers)
         site-work (mapcat (fn [[sites workers]]
-                            (println sites workers)
                             (let [work-capabilities (select [ALL :capabilities :work] workers)
                                   total-work (* dt (reduce + work-capabilities))
                                   work-per-site (/ total-work (count sites))]
