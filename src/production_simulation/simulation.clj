@@ -18,7 +18,7 @@
 ;; @@
 (def world (atom {:objects {} :locations {}}))
 
-(swap! world begin-construction (loc 124) {:types #{:farm}})sav
+(swap! world begin-construction (loc 124) {:types #{:farm}})
 (swap! world begin-construction (loc 124) {:types #{:city}})
 (swap! world begin-construction (loc 126) {:types #{:city}})
 (swap! world finish-unit (loc 124) {:capabilities {:work 10}})
